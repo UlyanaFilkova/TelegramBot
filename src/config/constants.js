@@ -29,18 +29,15 @@ export const FREE_MODELS = {
     'free-router': 'openrouter/free'                       // Рекомендую!
 };
 
-// Системный промпт — объясняем ИИ его роль
 export const SYSTEM_PROMPT = {
     role: 'system',
     content: 'Ты дружелюбный помощник в Telegram. Отвечай кратко и по делу. Твой ответ не должен превышать 1000 символов. Если пользователь спрашивает про расходы или финансы, помогай с учетом трат.'
 };
 
-// ID администратора (замени на свой Telegram ID)
-export const ADMIN_ID = 123456789; // ⚠️ Замени на свой ID!
+export const ADMIN_ID = 1120721483;
 
-// Настройки для повторных попыток
 export const RETRY_CONFIG = {
     maxRetries: 3,
-    baseDelay: 2000, // 2 секунды
-    maxDelay: 10000  // 10 секунд
+    baseDelay: 2000,
+    maxDelay: 10000
 };

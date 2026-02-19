@@ -2,12 +2,8 @@ import { chatHistory, userModel } from '../services/openrouter.js';
 import { formatModelsList } from '../utils/formatters.js';
 import { FREE_MODELS, ADMIN_ID } from '../config/constants.js';
 
-/**
- * Регистрация всех обработчиков команд
- */
 export function registerCommands(bot) {
 
-    // Команда /start
     bot.onText(/\/start/, async (msg) => {
         const chatId = msg.chat.id;
         const firstName = msg.from.first_name || 'друг';
@@ -38,7 +34,6 @@ export function registerCommands(bot) {
         );
     });
 
-    // Команда /help
     bot.onText(/\/help/, (msg) => {
         const chatId = msg.chat.id;
 
@@ -56,7 +51,6 @@ export function registerCommands(bot) {
         );
     });
 
-    // Команда /model — показать доступные модели
     bot.onText(/\/model$/, async (msg) => {
         const chatId = msg.chat.id;
         const currentModel = userModel.get(chatId) || 'deepseek-chat';
@@ -67,12 +61,10 @@ export function registerCommands(bot) {
         await bot.sendMessage(chatId, text, { parse_mode: 'Markdown' });
     });
 
-    // Команда /model [название] — выбрать модель
     bot.onText(/\/model (.+)/, async (msg, match) => {
         const chatId = msg.chat.id;
         const modelKey = match[1].trim().toLowerCase();
 
-        // Проверяем, есть ли такая модель
         if (FREE_MODELS[modelKey]) {
             userModel.set(chatId, modelKey);
             await bot.sendMessage(chatId,
@@ -81,7 +73,6 @@ export function registerCommands(bot) {
                 { parse_mode: 'Markdown' }
             );
         } else {
-            // Показываем похожие модели или список
             const availableModels = Object.keys(FREE_MODELS).join(', ');
             await bot.sendMessage(chatId,
                 `❌ Модель "${modelKey}" не найдена.\n\n` +
@@ -91,14 +82,12 @@ export function registerCommands(bot) {
         }
     });
 
-    // Команда /clear
     bot.onText(/\/clear/, (msg) => {
         const chatId = msg.chat.id;
         chatHistory.delete(chatId);
         bot.sendMessage(chatId, '🧹 История диалога очищена! Начинаем с чистого листа.');
     });
-
-    // Команда /stats (только для админа)
+    
     bot.onText(/\/stats/, (msg) => {
         const chatId = msg.chat.id;
         const userId = msg.from.id;

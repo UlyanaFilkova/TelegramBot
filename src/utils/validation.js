@@ -1,8 +1,3 @@
-/**
- * Проверка, является ли сообщение "сломанным" для ИИ
- * @param {string} text - текст сообщения
- * @returns {boolean} - true если сообщение может сломать ИИ
- */
 export function isAIBreakingMessage(text) {
     if (!text) return true;
 
@@ -26,11 +21,6 @@ export function isAIBreakingMessage(text) {
     return false;
 }
 
-/**
- * Получить дружелюбное сообщение для "сломанного" ввода
- * @param {string} text - исходное сообщение
- * @returns {string} - ответ пользователю
- */
 export function getAIBreakingMessage(text) {
     const trimmed = text.trim();
 
@@ -55,11 +45,6 @@ export function getAIBreakingMessage(text) {
     return '🤨 Я не могу обработать такое сообщение. Попробуй написать обычным текстом.';
 }
 
-/**
- * Проверка, содержит ли сообщение запрос о расходах
- * @param {string} text - текст сообщения
- * @returns {boolean} - true если это запрос о расходах
- */
 export function isExpenseQuery(text) {
     if (!text) return false;
 

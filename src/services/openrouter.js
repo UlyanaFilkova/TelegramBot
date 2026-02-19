@@ -1,14 +1,9 @@
 import OpenAI from 'openai';
 
-// Хранилище истории диалогов
 export const chatHistory = new Map();
 
-// Текущая модель для каждого пользователя
 export const userModel = new Map();
 
-/**
- * Создание клиента OpenRouter
- */
 export function createOpenRouterClient(apiKey) {
     return new OpenAI({
         apiKey: apiKey,
@@ -16,9 +11,6 @@ export function createOpenRouterClient(apiKey) {
     });
 }
 
-/**
- * Запрос к OpenRouter API
- */
 export async function askOpenRouter(
     openrouter,
     chatId,
@@ -28,10 +20,8 @@ export async function askOpenRouter(
     modelKey = 'deepseek-v3'
 ) {
     try {
-        // Получаем историю чата или создаем новую
         let history = chatHistory.get(chatId) || [];
 
-        // Добавляем сообщение пользователя в историю
         history.push({ role: 'user', content: userMessage });
 
         // Ограничиваем историю последними 10 сообщениями
@@ -39,19 +29,16 @@ export async function askOpenRouter(
             history = history.slice(-10);
         }
 
-        // Получаем выбранную пользователем модель или используем дефолтную
         const model = userModel.get(chatId) || modelKey;
         const modelId = FREE_MODELS[model] || FREE_MODELS['deepseek-chat'];
 
         console.log(`🤔 Запрос к ${modelId} от пользователя ${chatId}`);
 
-        // Формируем запрос
         const messages = [
             SYSTEM_PROMPT,
             ...history
         ];
 
-        // Отправляем запрос к OpenRouter
         const response = await openrouter.chat.completions.create({
             model: modelId,
             messages: messages,
@@ -59,29 +46,19 @@ export async function askOpenRouter(
             temperature: 0.7,
         });
 
-        // Получаем ответ
         const reply = response.choices[0].message.content;
 
-        // Добавляем ответ в историю
         history.push({ role: 'assistant', content: reply });
         chatHistory.set(chatId, history);
-
-        // Логируем использование
-        if (response.usage) {
-            console.log(`📊 Токены: ${response.usage.total_tokens} (вход: ${response.usage.prompt_tokens}, выход: ${response.usage.completion_tokens})`);
-        }
 
         return reply;
 
     } catch (error) {
         console.error('❌ Ошибка OpenRouter:', error);
-        throw error; // Пробрасываем ошибку для обработки в withRetry
+        throw error;
     }
 }
 
-/**
- * Диагностика ключа OpenRouter
- */
 export async function diagnoseOpenRouterKey(openrouterKey) {
     console.log('🔍 Диагностика ключа OpenRouter...');
 

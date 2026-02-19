@@ -1,6 +1,3 @@
-/**
- * Форматирование списка моделей
- */
 export function formatModelsList(FREE_MODELS) {
     let text = '🎯 *Доступные бесплатные модели:*\n\n';
     let i = 1;
@@ -13,13 +10,9 @@ export function formatModelsList(FREE_MODELS) {
     return text;
 }
 
-/**
- * Функция для конвертации Markdown в Telegram HTML
- */
 export function markdownToTelegram(text) {
     if (!text) return text;
 
-    // Экранируем специальные символы HTML
     let converted = text
         .replace(/&/g, '&amp;')
         .replace(/</g, '&lt;')
@@ -53,9 +46,6 @@ export function markdownToTelegram(text) {
     return converted;
 }
 
-/**
- * Разбить длинное сообщение на части для Telegram
- */
 export function splitLongMessage(text, maxLength = 4096) {
     if (text.length <= maxLength) return [text];
     return text.match(/[\s\S]{1,4096}/g) || [];

@@ -1,11 +1,3 @@
-/**
- * Функция с повторными попытками при ошибках OpenRouter
- * @param {Function} fn - асинхронная функция для повторения
- * @param {number} chatId - ID чата для уведомлений
- * @param {Object} bot - экземпляр бота для отправки уведомлений
- * @param {Object} config - конфигурация повторных попыток
- * @returns {Promise<any>} - результат выполнения функции
- */
 export async function withRetry(fn, chatId, bot, config) {
     const { maxRetries, baseDelay } = config;
     let lastError = null;
@@ -14,16 +6,13 @@ export async function withRetry(fn, chatId, bot, config) {
         try {
             console.log(`🔄 Попытка ${attempt}/${maxRetries} для пользователя ${chatId}`);
 
-            // Пробуем выполнить функцию
             const result = await fn();
 
-            // Если успешно — возвращаем результат
             return result;
 
         } catch (error) {
             lastError = error;
 
-            // Определяем, стоит ли повторять попытку
             const shouldRetry =
                 error.status === 429 || // Too Many Requests
                 error.status === 500 || // Internal Server Error
@@ -45,21 +34,16 @@ export async function withRetry(fn, chatId, bot, config) {
             const delay = Math.min(baseDelay * Math.pow(2, attempt - 1), config.maxDelay);
             console.log(`⏳ Ждем ${delay}мс перед попыткой ${attempt + 1}...`);
 
-            // Отправляем уведомление пользователю
             if (attempt === 1 && bot) {
                 try {
                     await bot.sendMessage(chatId,
                         '⏳ ИИ временно перегружен. Пробую снова через несколько секунд...'
                     );
-                } catch (notifyError) {
-                    // Игнорируем ошибки уведомления
-                }
+                } catch (notifyError) {}
             }
 
             await new Promise(resolve => setTimeout(resolve, delay));
         }
     }
-
-    // Если все попытки исчерпаны, выбрасываем последнюю ошибку
     throw lastError;
 }

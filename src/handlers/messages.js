@@ -4,26 +4,19 @@ import { withRetry } from '../utils/retry.js';
 import { FREE_MODELS, SYSTEM_PROMPT, RETRY_CONFIG } from '../config/constants.js';
 import { isAIBreakingMessage, getAIBreakingMessage, isExpenseQuery } from '../utils/validation.js';
 
-/**
- * Регистрация обработчика сообщений
- */
 export function registerMessageHandler(bot, openrouter) {
 
     bot.on('message', async (msg) => {
         const chatId = msg.chat.id;
         const text = msg.text;
 
-        // Игнорируем пустые сообщения
         if (!text) return;
 
-        // Игнорируем команды (они начинаются с /)
         if (text.startsWith('/')) {
             return;
         }
 
-        // Проверяем, есть ли пользователь в системе
         if (!chatHistory.has(chatId)) {
-            // Если нет — отправляем приветствие и предлагаем начать
             await bot.sendMessage(chatId,
                 '👋 Привет! Напиши /start чтобы начать общение.'
             );
@@ -50,13 +43,11 @@ export function registerMessageHandler(bot, openrouter) {
         }
 
         try {
-            // Отправляем "печатает..." чтобы пользователь знал, что бот думает
+            // Отправляем "печатает..."
             await bot.sendChatAction(chatId, 'typing');
 
-            // Получаем текущую модель пользователя
             const currentModel = userModel.get(chatId) || 'deepseek-chat';
 
-            // Создаем функцию для запроса к OpenRouter
             const askFunction = () => askOpenRouter(
                 openrouter,
                 chatId,
@@ -66,16 +57,13 @@ export function registerMessageHandler(bot, openrouter) {
                 currentModel
             );
 
-            // Получаем ответ с повторными попытками
             const reply = await withRetry(askFunction, chatId, bot, RETRY_CONFIG);
 
-            // Проверка на пустой ответ
             if (!reply || reply.trim().length === 0) {
                 await bot.sendMessage(chatId, '⚠️ Нейросеть вернула пустой ответ. Попробуй еще раз.');
                 return;
             }
 
-            // Конвертируем Markdown в Telegram HTML
             const formattedReply = markdownToTelegram(reply);
 
             if (!formattedReply || formattedReply.trim().length === 0) {
@@ -83,7 +71,6 @@ export function registerMessageHandler(bot, openrouter) {
                 return;
             }
 
-            // Разбиваем на части и отправляем
             const chunks = splitLongMessage(formattedReply);
             let sentCount = 0;
 
@@ -101,7 +88,6 @@ export function registerMessageHandler(bot, openrouter) {
         } catch (error) {
             console.error('❌ Ошибка:', error);
 
-            // Отправляем пользователю понятное сообщение
             let errorMessage = '😵 Извините, сервис ИИ временно недоступен. ';
 
             if (error.status === 429) {

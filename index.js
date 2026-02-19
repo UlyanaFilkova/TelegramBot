@@ -19,25 +19,18 @@ if (!openrouterKey) {
     process.exit(1);
 }
 
-// Создаем клиент OpenRouter
+const bot = new TelegramBot(token, { polling: true });
 const openrouter = createOpenRouterClient(openrouterKey);
 
-// Опционально: диагностика ключа (раскомментируй если нужно)
 // await diagnoseOpenRouterKey(openrouterKey);
 
-// Создаем бота
-const bot = new TelegramBot(token, { polling: true });
-
-// Регистрируем все обработчики
 registerCommands(bot);
 registerMessageHandler(bot, openrouter);
 
-// Обработка ошибок polling
 bot.on('polling_error', (error) => {
     console.log('Ошибка polling:', error);
 });
 
-// Обработка graceful shutdown
 process.once('SIGINT', () => {
     console.log('\n👋 Бот остановлен (SIGINT)');
     bot.stopPolling();
