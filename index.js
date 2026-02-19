@@ -145,6 +145,45 @@ function formatModelsList() {
     return text;
 }
 
+// Функция для конвертации Markdown в Telegram HTML
+function markdownToTelegram(text) {
+    if (!text) return text;
+
+    // Экранируем специальные символы HTML
+    let converted = text
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
+
+    // Жирный текст: **текст** или __текст__ -> <b>текст</b>
+    converted = converted.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>');
+    converted = converted.replace(/__(.*?)__/g, '<b>$1</b>');
+
+    // Курсив: *текст* или _текст_ -> <i>текст</i>
+    // Но нужно быть осторожным, чтобы не задеть экранированные символы
+    converted = converted.replace(/(?<!\*)\*(?!\*)(.*?)(?<!\*)\*(?!\*)/g, '<i>$1</i>');
+    converted = converted.replace(/(?<!_)_(?!_)(.*?)(?<!_)_(?!_)/g, '<i>$1</i>');
+
+    // Моноширинный код: `текст` -> <code>текст</code>
+    converted = converted.replace(/`(.*?)`/g, '<code>$1</code>');
+
+    // Блок кода: ```текст``` -> <pre>текст</pre>
+    converted = converted.replace(/```(.*?)```/gs, '<pre>$1</pre>');
+
+    // Заголовки: # текст -> <b>текст</b> (в Telegram нет заголовков)
+    converted = converted.replace(/^# (.*?)$/gm, '<b>$1</b>');
+    converted = converted.replace(/^## (.*?)$/gm, '<b>$1</b>');
+    converted = converted.replace(/^### (.*?)$/gm, '<b>$1</b>');
+
+    // Списки: - текст или * текст
+    converted = converted.replace(/^[-*] (.*?)$/gm, '• $1');
+
+    // Ссылки: [текст](ссылка) -> <a href="ссылка">текст</a>
+    converted = converted.replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2">$1</a>');
+
+    return converted;
+}
+
 const bot = new TelegramBot(token, { polling: true });
 
 // Команда /start
@@ -293,17 +332,19 @@ bot.on('message', async (msg) => {
         // Получаем ответ от OpenRouter
         const reply = await askOpenRouter(chatId, text, currentModel);
 
-        // Отправляем ответ (разбиваем, если слишком длинный)
-        if (reply.length > 4096) {
-            // Telegram ограничивает длину сообщения
-            const chunks = reply.match(/[\s\S]{1,4096}/g) || [];
+        // Конвертируем Markdown в Telegram HTML
+        const formattedReply = markdownToTelegram(reply);
+
+        // Отправляем с HTML-разметкой
+        if (formattedReply.length > 4096) {
+            // Разбиваем ответ, если он слишком длинный
+            const chunks = formattedReply.match(/[\s\S]{1,4096}/g) || [];
             for (const chunk of chunks) {
-                await bot.sendMessage(chatId, chunk);
+                await bot.sendMessage(chatId, chunk, { parse_mode: 'HTML' });
             }
         } else {
-            await bot.sendMessage(chatId, reply);
+            await bot.sendMessage(chatId, formattedReply, { parse_mode: 'HTML' });
         }
-
     } catch (error) {
         console.error('❌ Ошибка в обработчике:', error);
         await bot.sendMessage(chatId,
