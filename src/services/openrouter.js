@@ -1,4 +1,5 @@
 import OpenAI from 'openai';
+import {DEFAULT_MODEL} from "../config/constants.js";
 
 export const chatHistory = new Map();
 
@@ -30,7 +31,7 @@ export async function askOpenRouter(
         }
 
         const model = userModel.get(chatId) || modelKey;
-        const modelId = FREE_MODELS[model] || FREE_MODELS['deepseek-chat'];
+        const modelId = FREE_MODELS[model] || FREE_MODELS[DEFAULT_MODEL];
 
         console.log(`🤔 Запрос к ${modelId} от пользователя ${chatId}`);
 
