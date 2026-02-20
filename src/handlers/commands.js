@@ -1,6 +1,6 @@
 import { chatHistory, userModel } from '../services/openrouter.js';
 import { formatModelsList } from '../utils/formatters.js';
-import { FREE_MODELS, ADMIN_ID } from '../config/constants.js';
+import {FREE_MODELS, ADMIN_ID, DEFAULT_MODEL} from '../config/constants.js';
 
 export function registerCommands(bot) {
 
@@ -15,7 +15,7 @@ export function registerCommands(bot) {
 
         // Устанавливаем модель по умолчанию
         if (!userModel.has(chatId)) {
-            userModel.set(chatId, 'deepseek-chat');
+            userModel.set(chatId, DEFAULT_MODEL);
         }
 
         const currentModel = userModel.get(chatId);
@@ -53,7 +53,7 @@ export function registerCommands(bot) {
 
     bot.onText(/\/model$/, async (msg) => {
         const chatId = msg.chat.id;
-        const currentModel = userModel.get(chatId) || 'deepseek-chat';
+        const currentModel = userModel.get(chatId) || DEFAULT_MODEL;
 
         let text = formatModelsList(FREE_MODELS);
         text += `\n\n✨ *Текущая модель:* ${currentModel}`;

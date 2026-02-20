@@ -1,37 +1,44 @@
 export const FREE_MODELS = {
-    // DeepSeek (самые популярные)
-    'deepseek-r1': 'deepseek/deepseek-r1:free',           // R1 reasoning model
-    'deepseek-v3': 'deepseek/deepseek-r1-0528:free', // V3 chat model
-    'deepseek-chat': 'upstage/solar-pro-3:free',
+    // 'default-chat': 'openrouter/free',
 
-    // Meta Llama
-    'llama-3.3': 'meta-llama/llama-3.3-70b-instruct:free',    // 70B модель
-    'llama-3.1': 'meta-llama/llama-3.1-8b-instruct:free',
+    // быстрые
 
-    // Google
-    'gemma-2': 'google/gemma-2-9b-it:free',
-    'gemma-3': 'google/gemma-3-4b-it:free',               // Новая Gemma 3
+    // upstage
+    'solar-pro-3': 'upstage/solar-pro-3:free',
 
-    // Microsoft
-    'phi-3': 'microsoft/phi-3-mini-128k-instruct:free',
+    // arcee-ai
+    'arcee-ai-large': 'arcee-ai/trinity-large-preview:free',
+    'arcee-ai-mini': 'arcee-ai/trinity-mini:free',
 
-    // Mistral
-    'mistral': 'mistralai/mistral-7b-instruct:free',
+    // stepfun
+    'stepfun': 'stepfun/step-3.5-flash:free',
 
-    // Qwen
-    'qwen-2': 'qwen/qwen2-7b-instruct:free',
-    'qwen-3': 'qwen/qwen3-4b:free',                       // Qwen 3
+    // z-ai
+    'z-ai': 'z-ai/glm-4.5-air:free',
 
-    // NVIDIA
-    'nemotron': 'nvidia/nemotron-nano-8b-v1:free',
+    // nvidia
+    'nvidia-nano': 'nvidia/nemotron-nano-12b-v2-vl:free',
+    'nvidia-3-nano': 'nvidia/nemotron-3-nano-30b-a3b:free',
 
-    // Специальная модель OpenRouter (автоматически выбирает лучшую бесплатную)
-    'free-router': 'openrouter/free'                       // Рекомендую!
+    // qwen
+    'qwen-30b': 'qwen/qwen3-vl-30b-a3b-thinking',
+    'qwen-235b': 'qwen/qwen3-vl-235b-a22b-thinking',
+    'qwen-235b-2507': 'qwen/qwen3-235b-a22b-thinking-2507',
+
+    // OpenRouter (автоматически выбирает лучшую бесплатную модель)
+    'free-router': 'openrouter/free',
+
+    // медленные
+
+    // DeepSeek
+    'deepseek-r1': 'deepseek/deepseek-r1-0528:free',
 };
+
+export const DEFAULT_MODEL = "nvidia-3-nano"//"default-chat"
 
 export const SYSTEM_PROMPT = {
     role: 'system',
-    content: 'Ты помощник в Telegram. Отвечай как Лебовски из фильма Большой Лебовски. Отвечай кратко и по делу. Твой ответ не должен превышать 1000 символов. Если пользователь спрашивает про расходы или финансы, помогай с учетом трат.'
+    content: 'Ты помощник в Telegram. Говори на русском языке. Отвечай как Лебовски из фильма Большой Лебовски. Отвечай кратко и по делу. Твой ответ не должен превышать 1000 символов. Если пользователь спрашивает про расходы или финансы, помогай с учетом трат.'
 };
 
 export const ADMIN_ID = 1120721483;

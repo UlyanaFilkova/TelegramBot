@@ -1,7 +1,7 @@
 import { chatHistory, userModel, askOpenRouter } from '../services/openrouter.js';
 import { markdownToTelegram, splitLongMessage } from '../utils/formatters.js';
 import { withRetry } from '../utils/retry.js';
-import { FREE_MODELS, SYSTEM_PROMPT, RETRY_CONFIG } from '../config/constants.js';
+import {FREE_MODELS, SYSTEM_PROMPT, RETRY_CONFIG, DEFAULT_MODEL} from '../config/constants.js';
 import { isAIBreakingMessage, getAIBreakingMessage, isExpenseQuery } from '../utils/validation.js';
 
 export function registerMessageHandler(bot, openrouter) {
@@ -46,7 +46,7 @@ export function registerMessageHandler(bot, openrouter) {
             // Отправляем "печатает..."
             await bot.sendChatAction(chatId, 'typing');
 
-            const currentModel = userModel.get(chatId) || 'deepseek-chat';
+            const currentModel = userModel.get(chatId) || DEFAULT_MODEL;
 
             const askFunction = () => askOpenRouter(
                 openrouter,
