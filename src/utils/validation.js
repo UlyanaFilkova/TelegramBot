@@ -3,19 +3,24 @@ export function isAIBreakingMessage(text) {
 
     const trimmed = text.trim();
 
-    // Слишком короткие сообщения
+    // Слишком короткие сообщения (меньше 2 символов)
     if (trimmed.length < 2) return true;
 
-    // Только цифры
-    if (/^\d+$/.test(trimmed)) return true;
+    // Только цифры (включая пробелы между цифрами)
+    if (/^[\d\s]+$/.test(trimmed)) return true;
 
-    // Только спецсимволы
-    if (/^[^\w\s]+$/.test(trimmed)) return true;
+    // Только спецсимволы (без букв и цифр)
+    // ИСПРАВЛЕНО: теперь проверяем, что в строке вообще нет букв
+    if (!/[а-яёa-z]/i.test(trimmed) && /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(trimmed)) {
+        return true;
+    }
 
-    // Только цифры и спецсимволы
-    if (/^[\d\s!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]+$/.test(trimmed)) return true;
+    // Только цифры и спецсимволы (без букв)
+    if (!/[а-яёa-z]/i.test(trimmed) && /[\d\s!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]+$/.test(trimmed)) {
+        return true;
+    }
 
-    // Слишком много повторяющихся символов
+    // Слишком много повторяющихся символов (более 10 подряд)
     if (/(.)\1{10,}/.test(trimmed)) return true;
 
     return false;
@@ -24,7 +29,8 @@ export function isAIBreakingMessage(text) {
 export function getAIBreakingMessage(text) {
     const trimmed = text.trim();
 
-    if (/^\d+$/.test(trimmed)) {
+    // Только цифры
+    if (/^[\d\s]+$/.test(trimmed)) {
         const responses = [
             '🔢 Я получил только цифры. Может, расскажешь, что они значат?',
             '📊 Это какая-то статистика? Напиши словами, что ты имеешь в виду.',
@@ -34,10 +40,12 @@ export function getAIBreakingMessage(text) {
         return responses[Math.floor(Math.random() * responses.length)];
     }
 
-    if (/^[^\w\s]+$/.test(trimmed)) {
+    // Только спецсимволы (без букв)
+    if (!/[а-яёa-z]/i.test(trimmed) && /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(trimmed)) {
         return '❓ Я не понимаю набор символов. Напиши, пожалуйста, словами.';
     }
 
+    // Слишком короткое сообщение
     if (trimmed.length < 2) {
         return '🤔 Слишком короткое сообщение. Напиши что-нибудь подлиннее.';
     }
