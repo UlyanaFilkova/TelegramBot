@@ -1,4 +1,5 @@
 import { FinanceRecord } from '../models/FinanceRecord.js';
+import { roundMoney, sumMoney, formatMoney } from '../utils/money.js';
 
 const records = new Map();
 
@@ -54,20 +55,23 @@ export function getUserStats(chatId) {
     };
 
     userRecords.forEach(record => {
+        // Суммируем с округлением
         if (record.type === 'income') {
-            stats.income += record.amount;
+            stats.income = roundMoney(stats.income + record.amount);
         } else {
-            stats.expense += record.amount;
+            stats.expense = roundMoney(stats.expense + record.amount);
         }
 
         // Статистика по категориям
         if (!stats.byCategory[record.category]) {
             stats.byCategory[record.category] = 0;
         }
-        stats.byCategory[record.category] += record.amount;
+        stats.byCategory[record.category] = roundMoney(
+            stats.byCategory[record.category] + record.amount
+        );
     });
 
-    stats.balance = stats.income - stats.expense;
+    stats.balance = roundMoney(stats.income - stats.expense);
 
     return stats;
 }
@@ -83,20 +87,26 @@ export function formatUserStats(chatId) {
     }
 
     let result = '📊 *Твоя статистика*\n\n';
-    result += `💰 Доходы: +${stats.income} ₽\n`;
-    result += `💸 Расходы: -${stats.expense} ₽\n`;
+    result += `💰 Доходы: ${formatMoney(stats.income, true)}\n`;
+    result += `💸 Расходы: ${formatMoney(-stats.expense, true)}\n`;
 
-    const balanceEmoji = stats.balance >= 0 ? '✅' : '⚠️';
-    result += `${balanceEmoji} Баланс: ${stats.balance >= 0 ? '+' : '-'}${Math.abs(stats.balance)} ₽\n\n`;
+    result += `✅ Баланс: ${stats.balance >= 0 ? '+' : '-'}${Math.abs(stats.balance)}\n\n`;
 
     if (Object.keys(stats.byCategory).length > 0) {
         result += '📈 *По категориям:*\n';
         Object.entries(stats.byCategory)
             .sort((a, b) => b[1] - a[1])
             .forEach(([category, amount]) => {
-                const sign = amount > 0 ? '+' : '-';
-                result += `  ${category}: ${sign}${Math.abs(amount)} ₽\n`;
+                result += `  ${category}: ${formatMoney(amount, true)}\n`;
             });
+    }
+
+    const lastRecords = getUserRecords(chatId).slice(0, 3);
+    if (lastRecords.length > 0) {
+        result += '\n🕒 *Последние записи:*\n';
+        lastRecords.forEach(record => {
+            result += `  ${record.formatShort()}\n`;
+        });
     }
 
     return result;

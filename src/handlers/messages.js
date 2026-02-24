@@ -4,6 +4,7 @@ import { withRetry } from '../utils/retry.js';
 import {FREE_MODELS, SYSTEM_PROMPT, RETRY_CONFIG, DEFAULT_MODEL} from '../config/constants.js';
 import { isAIBreakingMessage, getAIBreakingMessage, isExpenseQuery } from '../utils/validation.js';
 import { saveRecord, getLastRecord, formatUserStats } from '../services/storage.js';
+import { roundMoney, formatMoney } from '../utils/money.js';
 
 export function registerMessageHandler(bot, openrouter) {
 
@@ -90,16 +91,20 @@ export function registerMessageHandler(bot, openrouter) {
                 // Сохраняем запись
                 const record = saveRecord(chatId, financeData);
 
-                // Получаем последнюю запись для проверки
-                const lastRecord = getLastRecord(chatId);
+                // Для отладки - посмотрим, какие числа пришли
+                console.log('💰 Финансовые данные:', {
+                    original: financeData.amount,
+                    parsed: parseFloat(financeData.amount),
+                    rounded: roundMoney(parseFloat(financeData.amount)),
+                    saved: record.amount
+                });
 
                 // Формируем красивое подтверждение
                 let response = '✅ *Запись добавлена!*\n\n';
                 response += record.format();
 
-                // Добавляем краткую статистику
-                const stats = formatUserStats(chatId);
-                response += `\n\n${stats}`;
+                // Добавляем статистику
+                response += `\n\n${formatUserStats(chatId)}`;
 
                 await bot.sendMessage(chatId, response, { parse_mode: 'Markdown' });
                 return;

@@ -1,9 +1,11 @@
+import { roundMoney, formatMoney } from '../utils/money.js';
+
 export class FinanceRecord {
     constructor(chatId, data) {
         this.id = this.generateId();                    // Уникальный ID записи
         this.chatId = chatId;                           // Кто создал
         this.type = data.type === 'Доходы' ? 'income' : 'expense';  // Тип операции
-        this.amount = data.amount;                      // Сумма
+        this.amount = roundMoney(parseFloat(data.amount));                   // Сумма
         this.description = data.description;            // Описание
         this.category = data.category;                  // Категория
         this.createdAt = new Date();                     // Дата создания в системе
@@ -57,7 +59,27 @@ export class FinanceRecord {
             `   📅 ${dateTimeStr}`
         );
     }
-    
+
+    formatShort() {
+        const sign = this.type === 'income' ? '+' : '-';
+        const dateStr = this.formatDateShort();
+        return `${sign}${this.amount.toFixed(2)} ₽ • ${this.category} • ${dateStr}`;
+    }
+
+    formatDateShort() {
+        const day = String(this.date.getDate()).padStart(2, '0');
+        const month = String(this.date.getMonth() + 1).padStart(2, '0');
+        const year = this.date.getFullYear();
+
+        if (this.hasTime) {
+            const hours = String(this.date.getHours()).padStart(2, '0');
+            const minutes = String(this.date.getMinutes()).padStart(2, '0');
+            return `${day}-${month}-${year} ${hours}:${minutes}`;
+        }
+
+        return `${day}-${month}-${year}`;
+    }
+
     debug() {
         return {
             id: this.id,
