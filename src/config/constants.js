@@ -1,5 +1,5 @@
 export const FREE_MODELS = {
-    'default-chat': 'openrouter/free',
+    'default-chat': 'qwen/qwen3-vl-30b-a3b-thinking',
 
     // быстрые
 

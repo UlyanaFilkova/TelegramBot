@@ -3,6 +3,7 @@ import { markdownToTelegram, splitLongMessage } from '../utils/formatters.js';
 import { withRetry } from '../utils/retry.js';
 import {FREE_MODELS, SYSTEM_PROMPT, RETRY_CONFIG, DEFAULT_MODEL} from '../config/constants.js';
 import { isAIBreakingMessage, getAIBreakingMessage, isExpenseQuery } from '../utils/validation.js';
+import { saveRecord, getLastRecord, formatUserStats } from '../services/storage.js';
 
 export function registerMessageHandler(bot, openrouter) {
 
@@ -64,6 +65,47 @@ export function registerMessageHandler(bot, openrouter) {
                 return;
             }
 
+            let isJsonResponse = false;
+            let financeData = null;
+
+            try {
+                // Пробуем найти JSON в ответе
+                const jsonMatch = reply.match(/\{.*\}/s);
+                if (jsonMatch) {
+                    const potentialJson = jsonMatch[0];
+                    financeData = JSON.parse(potentialJson);
+
+                    // Проверяем, что это наша структура
+                    if (financeData.type && financeData.amount && financeData.description && financeData.category) {
+                        isJsonResponse = true;
+                    }
+                }
+            } catch (e) {
+                // Не JSON, значит обычный текст
+                console.log('Обычный текстовый ответ от ИИ');
+            }
+
+            // Если это финансовая операция
+            if (isJsonResponse && financeData) {
+                // Сохраняем запись
+                const record = saveRecord(chatId, financeData);
+
+                // Получаем последнюю запись для проверки
+                const lastRecord = getLastRecord(chatId);
+
+                // Формируем красивое подтверждение
+                let response = '✅ *Запись добавлена!*\n\n';
+                response += record.format();
+
+                // Добавляем краткую статистику
+                const stats = formatUserStats(chatId);
+                response += `\n\n${stats}`;
+
+                await bot.sendMessage(chatId, response, { parse_mode: 'Markdown' });
+                return;
+            }
+
+            // Если это обычный текст, форматируем и отправляем как раньше
             const formattedReply = markdownToTelegram(reply);
 
             if (!formattedReply || formattedReply.trim().length === 0) {
@@ -84,6 +126,7 @@ export function registerMessageHandler(bot, openrouter) {
             if (sentCount === 0) {
                 await bot.sendMessage(chatId, reply);
             }
+
 
         } catch (error) {
             console.error('❌ Ошибка:', error);
