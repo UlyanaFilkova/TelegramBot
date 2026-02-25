@@ -1,12 +1,22 @@
+import TelegramBot from 'node-telegram-bot-api';
 import { chatHistory, userModel, askOpenRouter } from '../services/openrouter.js';
 import { markdownToTelegram, splitLongMessage } from '../utils/formatters.js';
 import { withRetry } from '../utils/retry.js';
-import { FREE_MODELS, SYSTEM_PROMPT, RETRY_CONFIG, DEFAULT_MODEL } from '../config/constants.ts';
+import { FREE_MODELS, SYSTEM_PROMPT, RETRY_CONFIG, DEFAULT_MODEL, ModelKey } from '../config/constants.ts';
 import { isAIBreakingMessage, getAIBreakingMessage, isExpenseQuery } from '../utils/validation.js';
 import { saveRecord, getLastRecord, formatUserStats } from '../services/storage.js';
+import { AIResponseJSON } from '../types/index.js';
+import { FinanceRecord } from '../models/FinanceRecord.js';
 
-export function registerMessageHandler(bot, openrouter) {
-  bot.on('message', async (msg) => {
+type TelegramMessage = TelegramBot.Message;
+
+interface ErrorWithStatus extends Error {
+  status?: number;
+  code?: string;
+}
+
+export function registerMessageHandler(bot: TelegramBot, openrouter: any): void {
+  bot.on('message', async (msg: TelegramMessage) => {
     const chatId = msg.chat.id;
     const text = msg.text;
 
@@ -34,7 +44,7 @@ export function registerMessageHandler(bot, openrouter) {
           chatId,
           '💡 *Совет:* Чтобы записать расход, напиши сумму и что купил.\n' +
             'Например: `300 обед` или `1500 продукты`',
-          { parse_mode: 'Markdown' }
+          { parse_mode: 'Markdown' as const }
         );
       }
 
@@ -45,7 +55,7 @@ export function registerMessageHandler(bot, openrouter) {
       // Отправляем "печатает..."
       await bot.sendChatAction(chatId, 'typing');
 
-      const currentModel = userModel.get(chatId) || DEFAULT_MODEL;
+      const currentModel = userModel.get(chatId) || DEFAULT_MODEL as ModelKey;
 
       const askFunction = () =>
         askOpenRouter(openrouter, chatId, text, FREE_MODELS, SYSTEM_PROMPT, currentModel);
@@ -58,22 +68,23 @@ export function registerMessageHandler(bot, openrouter) {
       }
 
       let isJsonResponse = false;
-      let financeData = null;
+      let financeData: AIResponseJSON | null = null;
 
       try {
         // Пробуем найти JSON в ответе
         const jsonMatch = reply.match(/\{.*\}/s);
         if (jsonMatch) {
           const potentialJson = jsonMatch[0];
-          financeData = JSON.parse(potentialJson);
+          const parsed = JSON.parse(potentialJson);
 
           // Проверяем, что это наша структура
           if (
-            financeData.type &&
-            financeData.amount &&
-            financeData.description &&
-            financeData.category
+            parsed.type &&
+            parsed.amount &&
+            parsed.description &&
+            parsed.category
           ) {
+            financeData = parsed as AIResponseJSON;
             isJsonResponse = true;
           }
         }
@@ -85,7 +96,7 @@ export function registerMessageHandler(bot, openrouter) {
       // Если это финансовая операция
       if (isJsonResponse && financeData) {
         // Сохраняем запись
-        const record = saveRecord(chatId, financeData);
+        const record: FinanceRecord = saveRecord(chatId, financeData);
 
         // Формируем красивое подтверждение
         let response = '✅ *Запись добавлена!*\n\n';
@@ -94,7 +105,7 @@ export function registerMessageHandler(bot, openrouter) {
         // Добавляем статистику
         response += `\n\n${formatUserStats(chatId)}`;
 
-        await bot.sendMessage(chatId, response, { parse_mode: 'Markdown' });
+        await bot.sendMessage(chatId, response, { parse_mode: 'Markdown' as const });
         return;
       }
 
@@ -114,7 +125,7 @@ export function registerMessageHandler(bot, openrouter) {
 
       for (const chunk of chunks) {
         if (chunk && chunk.trim().length > 0) {
-          await bot.sendMessage(chatId, chunk, { parse_mode: 'HTML' });
+          await bot.sendMessage(chatId, chunk, { parse_mode: 'HTML' as const });
           sentCount++;
         }
       }
@@ -123,15 +134,16 @@ export function registerMessageHandler(bot, openrouter) {
         await bot.sendMessage(chatId, reply);
       }
     } catch (error) {
-      console.error('❌ Ошибка:', error);
+      const err = error as ErrorWithStatus;
+      console.error('❌ Ошибка:', err);
 
       let errorMessage = '😵 Извините, сервис ИИ временно недоступен. ';
 
-      if (error.status === 429) {
+      if (err.status === 429) {
         errorMessage += 'Слишком много запросов. Попробуйте через минуту.';
-      } else if (error.status === 401) {
+      } else if (err.status === 401) {
         errorMessage += 'Проблема с авторизацией.';
-      } else if (error.code === 'ECONNREFUSED') {
+      } else if (err.code === 'ECONNREFUSED') {
         errorMessage += 'Нет соединения с сервером.';
       } else {
         errorMessage += 'Попробуйте еще раз позже.';
