@@ -109,11 +109,3 @@ export function formatUserStats(chatId) {
 
     return result;
 }
-
-// Для отладки (можно удалить позже)
-export function debugStorage() {
-    console.log('📦 Текущее состояние хранилища:');
-    records.forEach((userRecords, chatId) => {
-        console.log(`Пользователь ${chatId}: ${userRecords.length} записей`);
-    });
-}
