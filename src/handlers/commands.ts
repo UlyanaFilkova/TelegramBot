@@ -1,11 +1,14 @@
+import TelegramBot from 'node-telegram-bot-api';
 import { chatHistory, userModel } from '../services/openrouter.js';
 import { formatModelsList } from '../utils/formatters.js';
-import { FREE_MODELS, ADMIN_ID, DEFAULT_MODEL } from '../config/constants.ts';
+import { FREE_MODELS, ADMIN_ID, DEFAULT_MODEL, ModelKey } from '../config/constants.ts';
 
-export function registerCommands(bot) {
-  bot.onText(/\/start/, async (msg) => {
+type TelegramMessage = TelegramBot.Message;
+
+export function registerCommands(bot: TelegramBot): void {
+  bot.onText(/\/start/, async (msg: TelegramMessage) => {
     const chatId = msg.chat.id;
-    const firstName = msg.from.first_name || 'друг';
+    const firstName = msg.from?.first_name || 'друг';
 
     // Инициализируем историю для нового пользователя
     if (!chatHistory.has(chatId)) {
@@ -17,7 +20,7 @@ export function registerCommands(bot) {
       userModel.set(chatId, DEFAULT_MODEL);
     }
 
-    const currentModel = userModel.get(chatId);
+    const currentModel = userModel.get(chatId) as ModelKey;
 
     await bot.sendMessage(
       chatId,
@@ -30,11 +33,11 @@ export function registerCommands(bot) {
         `/clear — очистить историю диалога\n` +
         `/help — помощь\n\n` +
         `Просто напиши мне что-нибудь, и я отвечу!`,
-      { parse_mode: 'Markdown' }
+      { parse_mode: 'Markdown' as const }
     );
   });
 
-  bot.onText(/\/help/, (msg) => {
+  bot.onText(/\/help/, (msg: TelegramMessage) => {
     const chatId = msg.chat.id;
 
     bot.sendMessage(
@@ -48,23 +51,29 @@ export function registerCommands(bot) {
         '🤖 *О боте:*\n' +
         'Использует OpenRouter для доступа к бесплатным AI моделям.\n' +
         'Поддерживает DeepSeek, Llama, Gemma, Mistral и другие.',
-      { parse_mode: 'Markdown' }
+      { parse_mode: 'Markdown' as const }
     );
   });
 
-  bot.onText(/\/model$/, async (msg) => {
+  bot.onText(/\/model$/, async (msg: TelegramMessage) => {
     const chatId = msg.chat.id;
-    const currentModel = userModel.get(chatId) || DEFAULT_MODEL;
+    const currentModel = userModel.get(chatId) || DEFAULT_MODEL as ModelKey;
 
     let text = formatModelsList(FREE_MODELS);
     text += `\n\n✨ *Текущая модель:* ${currentModel}`;
 
-    await bot.sendMessage(chatId, text, { parse_mode: 'Markdown' });
+    await bot.sendMessage(chatId, text, { parse_mode: 'Markdown' as const });
   });
 
-  bot.onText(/\/model (.+)/, async (msg, match) => {
+  bot.onText(/\/model (.+)/, async (msg: TelegramMessage, match: RegExpExecArray | null) => {
     const chatId = msg.chat.id;
-    const modelKey = match[1].trim().toLowerCase();
+
+    if (!match || !match[1]) {
+      await bot.sendMessage(chatId, '❌ Пожалуйста, укажи название модели.');
+      return;
+    }
+
+    const modelKey = match[1].trim().toLowerCase() as ModelKey;
 
     if (FREE_MODELS[modelKey]) {
       userModel.set(chatId, modelKey);
@@ -72,7 +81,7 @@ export function registerCommands(bot) {
         chatId,
         `✅ Модель изменена на *${modelKey}*\n\n` +
           `Теперь я буду использовать: \`${FREE_MODELS[modelKey]}\``,
-        { parse_mode: 'Markdown' }
+        { parse_mode: 'Markdown' as const }
       );
     } else {
       const availableModels = Object.keys(FREE_MODELS).join(', ');
@@ -85,15 +94,15 @@ export function registerCommands(bot) {
     }
   });
 
-  bot.onText(/\/clear/, (msg) => {
+  bot.onText(/\/clear/, (msg: TelegramMessage) => {
     const chatId = msg.chat.id;
     chatHistory.delete(chatId);
     bot.sendMessage(chatId, '🧹 История диалога очищена! Начинаем с чистого листа.');
   });
 
-  bot.onText(/\/stats/, (msg) => {
+  bot.onText(/\/stats/, (msg: TelegramMessage) => {
     const chatId = msg.chat.id;
-    const userId = msg.from.id;
+    const userId = msg.from?.id;
 
     if (userId === ADMIN_ID) {
       const stats = {
@@ -106,14 +115,14 @@ export function registerCommands(bot) {
         `📊 *Статистика бота:*\n\n` +
           `👥 Пользователей в памяти: ${stats.totalUsers}\n` +
           `🎯 Модели: ${JSON.stringify(stats.activeModels, null, 2)}`,
-        { parse_mode: 'Markdown' }
+        { parse_mode: 'Markdown' as const }
       );
     } else {
       bot.sendMessage(chatId, '❌ У тебя нет доступа к этой команде.');
     }
   });
 
-  bot.onText(/\/test/, (msg) => {
+  bot.onText(/\/test/, (msg: TelegramMessage) => {
     const chatId = msg.chat.id;
 
     bot.sendMessage(
@@ -125,7 +134,7 @@ export function registerCommands(bot) {
         '• `а` (один символ)\n' +
         '• `300` (цифра - расход)\n' +
         '• `кофе 300` (корректный расход)',
-      { parse_mode: 'Markdown' }
+      { parse_mode: 'Markdown' as const }
     );
   });
 }
