@@ -1,44 +1,44 @@
 export const FREE_MODELS = {
-    'default-chat': 'qwen/qwen3-vl-30b-a3b-thinking',
+  'default-chat': 'qwen/qwen3-vl-30b-a3b-thinking',
 
-    // быстрые
+  // быстрые
 
-    // upstage
-    'solar-pro-3': 'upstage/solar-pro-3:free',
+  // upstage
+  'solar-pro-3': 'upstage/solar-pro-3:free',
 
-    // arcee-ai
-    'arcee-ai-large': 'arcee-ai/trinity-large-preview:free',
-    'arcee-ai-mini': 'arcee-ai/trinity-mini:free',
+  // arcee-ai
+  'arcee-ai-large': 'arcee-ai/trinity-large-preview:free',
+  'arcee-ai-mini': 'arcee-ai/trinity-mini:free',
 
-    // stepfun
-    'stepfun': 'stepfun/step-3.5-flash:free',
+  // stepfun
+  stepfun: 'stepfun/step-3.5-flash:free',
 
-    // z-ai
-    'z-ai': 'z-ai/glm-4.5-air:free',
+  // z-ai
+  'z-ai': 'z-ai/glm-4.5-air:free',
 
-    // nvidia
-    'nvidia-nano': 'nvidia/nemotron-nano-12b-v2-vl:free',
-    'nvidia-3-nano': 'nvidia/nemotron-3-nano-30b-a3b:free',
+  // nvidia
+  'nvidia-nano': 'nvidia/nemotron-nano-12b-v2-vl:free',
+  'nvidia-3-nano': 'nvidia/nemotron-3-nano-30b-a3b:free',
 
-    // qwen
-    'qwen-30b': 'qwen/qwen3-vl-30b-a3b-thinking',
-    'qwen-235b': 'qwen/qwen3-vl-235b-a22b-thinking',
-    'qwen-235b-2507': 'qwen/qwen3-235b-a22b-thinking-2507',
+  // qwen
+  'qwen-30b': 'qwen/qwen3-vl-30b-a3b-thinking',
+  'qwen-235b': 'qwen/qwen3-vl-235b-a22b-thinking',
+  'qwen-235b-2507': 'qwen/qwen3-235b-a22b-thinking-2507',
 
-    // OpenRouter (автоматически выбирает лучшую бесплатную модель)
-    'free-router': 'openrouter/free',
+  // OpenRouter (автоматически выбирает лучшую бесплатную модель)
+  'free-router': 'openrouter/free',
 
-    // медленные
+  // медленные
 
-    // DeepSeek
-    'deepseek-r1': 'deepseek/deepseek-r1-0528:free',
+  // DeepSeek
+  'deepseek-r1': 'deepseek/deepseek-r1-0528:free',
 };
 
-export const DEFAULT_MODEL = "default-chat"
+export const DEFAULT_MODEL = 'default-chat';
 
 export const SYSTEM_PROMPT = {
-    role: 'system',
-    content: `Ты финансовый помощник в Telegram. Говори на русском языке. Отвечай как Лебовски из фильма Большой Лебовски. Отвечай кратко и по делу.
+  role: 'system',
+  content: `Ты финансовый помощник в Telegram. Говори на русском языке. Отвечай как Лебовски из фильма Большой Лебовски. Отвечай кратко и по делу.
 
 Твоя задача: анализировать сообщения пользователя и определять, являются ли они финансовыми операциями (доходы/расходы).
 
@@ -111,13 +111,13 @@ export const SYSTEM_PROMPT = {
 Важно: 
 - Если пользователь написал просто число (например "500"), считай это расходом без описания, категория "❓ Другое".
 - Дата всегда в формате ДД-ММ-ГГГГ (день-месяц-год)
-- Время в формате ЧЧ:ММ`
+- Время в формате ЧЧ:ММ`,
 };
 
 export const ADMIN_ID = 1120721483;
 
 export const RETRY_CONFIG = {
-    maxRetries: 3,
-    baseDelay: 2000,
-    maxDelay: 10000
+  maxRetries: 3,
+  baseDelay: 2000,
+  maxDelay: 10000,
 };
