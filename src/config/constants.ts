@@ -1,4 +1,19 @@
-export const FREE_MODELS = {
+export type ModelKey =
+| 'default-chat'
+| 'solar-pro-3'
+| 'arcee-ai-large'
+| 'arcee-ai-mini'
+| 'stepfun'
+| 'z-ai'
+| 'nvidia-nano'
+| 'nvidia-3-nano'
+| 'qwen-30b'
+| 'qwen-235b'
+| 'qwen-235b-2507'
+| 'free-router'
+| 'deepseek-r1';
+
+export const FREE_MODELS: Record<ModelKey, string> = {
   'default-chat': 'qwen/qwen3-vl-30b-a3b-thinking',
 
   // быстрые
@@ -11,7 +26,7 @@ export const FREE_MODELS = {
   'arcee-ai-mini': 'arcee-ai/trinity-mini:free',
 
   // stepfun
-  stepfun: 'stepfun/step-3.5-flash:free',
+  'stepfun': 'stepfun/step-3.5-flash:free',
 
   // z-ai
   'z-ai': 'z-ai/glm-4.5-air:free',
@@ -34,9 +49,16 @@ export const FREE_MODELS = {
   'deepseek-r1': 'deepseek/deepseek-r1-0528:free',
 };
 
-export const DEFAULT_MODEL = 'default-chat';
+export const DEFAULT_MODEL: ModelKey = 'default-chat';
 
-export const SYSTEM_PROMPT = {
+export type PromptRole = 'system' | 'user' | 'assistant';
+
+export interface PromptMessage {
+  role: PromptRole;
+  content: string;
+}
+
+export const SYSTEM_PROMPT: PromptMessage = {
   role: 'system',
   content: `Ты финансовый помощник в Telegram. Говори на русском языке. Отвечай как Лебовски из фильма Большой Лебовски. Отвечай кратко и по делу.
 
@@ -114,9 +136,15 @@ export const SYSTEM_PROMPT = {
 - Время в формате ЧЧ:ММ`,
 };
 
-export const ADMIN_ID = 1120721483;
+export const ADMIN_ID: number = process.env.ADMIN_ID;
 
-export const RETRY_CONFIG = {
+export interface RetryConfig {
+  maxRetries: number;
+  baseDelay: number;
+  maxDelay: number;
+}
+
+export const RETRY_CONFIG: RetryConfig = {
   maxRetries: 3,
   baseDelay: 2000,
   maxDelay: 10000,

@@ -1,6 +1,6 @@
 import { chatHistory, userModel } from '../services/openrouter.js';
 import { formatModelsList } from '../utils/formatters.js';
-import { FREE_MODELS, ADMIN_ID, DEFAULT_MODEL } from '../config/constants.js';
+import { FREE_MODELS, ADMIN_ID, DEFAULT_MODEL } from '../config/constants.ts';
 
 export function registerCommands(bot) {
   bot.onText(/\/start/, async (msg) => {

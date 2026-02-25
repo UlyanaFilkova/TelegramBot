@@ -1,7 +1,7 @@
 import { chatHistory, userModel, askOpenRouter } from '../services/openrouter.js';
 import { markdownToTelegram, splitLongMessage } from '../utils/formatters.js';
 import { withRetry } from '../utils/retry.js';
-import { FREE_MODELS, SYSTEM_PROMPT, RETRY_CONFIG, DEFAULT_MODEL } from '../config/constants.js';
+import { FREE_MODELS, SYSTEM_PROMPT, RETRY_CONFIG, DEFAULT_MODEL } from '../config/constants.ts';
 import { isAIBreakingMessage, getAIBreakingMessage, isExpenseQuery } from '../utils/validation.js';
 import { saveRecord, getLastRecord, formatUserStats } from '../services/storage.js';
 

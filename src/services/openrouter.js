@@ -1,5 +1,5 @@
 import OpenAI from 'openai';
-import { DEFAULT_MODEL } from '../config/constants.js';
+import { DEFAULT_MODEL } from '../config/constants.ts';
 
 export const chatHistory = new Map();
 
