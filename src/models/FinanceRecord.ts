@@ -1,11 +1,24 @@
-import { roundMoney, formatMoney } from '../utils/money.js';
+import { roundMoney } from '../utils/money.js';
+import {
+    TransactionType,
+    AIResponseJSON
+} from '../types/index.js';
 
 export class FinanceRecord {
-    constructor(chatId, data) {
+    public readonly id: string;
+    public readonly chatId: number;
+    public readonly type: TransactionType;
+    public readonly amount: number;
+    public readonly description: string;
+    public readonly category: string;
+    public readonly createdAt: Date;
+    public date: Date;
+
+    constructor(chatId: number, data: AIResponseJSON) {
         this.id = this.generateId();
         this.chatId = chatId;
         this.type = data.type;
-        this.amount = roundMoney(parseFloat(data.amount));
+        this.amount = roundMoney(Number(data.amount));
         this.description = data.description;
         this.category = data.category;
         this.createdAt = new Date();
@@ -13,11 +26,11 @@ export class FinanceRecord {
         this.setDateTime(data.date, data.time);
     }
 
-    generateId() {
-        return `${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    private generateId(): string {
+        return `${Date.now()}_${Math.random().toString(36).substr(2, 11)}`;
     }
 
-    setDateTime(dateStr, timeStr) {
+    private setDateTime(dateStr?: string, timeStr?: string): void {
         if (dateStr) {
             // Парсим дату из формата ДД-ММ-ГГГГ
             const [day, month, year] = dateStr.split('-').map(Number);
@@ -26,17 +39,18 @@ export class FinanceRecord {
             this.date = new Date();
         }
 
+
         if (timeStr) {
             // Парсим время из формата ЧЧ:ММ
             const [hours, minutes] = timeStr.split(':').map(Number);
             this.date.setHours(hours, minutes, 0, 0);
-            this.hasTime = true;
         } else {
-            this.hasTime = false;
+            const now = new Date();
+            this.date.setHours(now.getHours(), now.getMinutes(), 0, 0);
         }
     }
 
-    format() {
+    public format(): string {
         const sign = this.type === 'income' ? '+' : '-';
         const emoji = this.type === 'income' ? '💰' : '💸';
         const typeText = this.type === 'income' ? 'Доход' : 'Расход';
@@ -44,14 +58,12 @@ export class FinanceRecord {
         const day = String(this.date.getDate()).padStart(2, '0');
         const month = String(this.date.getMonth() + 1).padStart(2, '0');
         const year = this.date.getFullYear();
-        const dateStr = `${day}-${month}-${year}`;
 
-        let dateTimeStr = dateStr;
-        if (this.hasTime) {
-            const hours = String(this.date.getHours()).padStart(2, '0');
-            const minutes = String(this.date.getMinutes()).padStart(2, '0');
-            dateTimeStr += ` в ${hours}:${minutes}`;
-        }
+        let dateTimeStr = `${day}-${month}-${year}`;
+
+        const hours = String(this.date.getHours()).padStart(2, '0');
+        const minutes = String(this.date.getMinutes()).padStart(2, '0');
+        dateTimeStr += ` в ${hours}:${minutes}`;
 
         return (
             `${emoji} *${this.category}* (${typeText})\n` +
@@ -60,36 +72,20 @@ export class FinanceRecord {
         );
     }
 
-    formatShort() {
+    public formatShort(): string {
         const sign = this.type === 'income' ? '+' : '-';
         const dateStr = this.formatDateShort();
         return `${sign}${this.amount.toFixed(2)} ₽ • ${this.category} • ${dateStr}`;
     }
 
-    formatDateShort() {
+    public formatDateShort(): string {
         const day = String(this.date.getDate()).padStart(2, '0');
         const month = String(this.date.getMonth() + 1).padStart(2, '0');
         const year = this.date.getFullYear();
 
-        if (this.hasTime) {
-            const hours = String(this.date.getHours()).padStart(2, '0');
-            const minutes = String(this.date.getMinutes()).padStart(2, '0');
-            return `${day}-${month}-${year} ${hours}:${minutes}`;
-        }
+        const hours = String(this.date.getHours()).padStart(2, '0');
+        const minutes = String(this.date.getMinutes()).padStart(2, '0');
 
-        return `${day}-${month}-${year}`;
-    }
-
-    debug() {
-        return {
-            id: this.id,
-            chatId: this.chatId,
-            type: this.type,
-            amount: this.amount,
-            description: this.description,
-            category: this.category,
-            date: this.date.toISOString(),
-            hasTime: this.hasTime
-        };
+        return `${day}-${month}-${year} ${hours}:${minutes}`;
     }
 }

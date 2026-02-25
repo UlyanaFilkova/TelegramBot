@@ -1,4 +1,4 @@
-import { FinanceRecord } from '../models/FinanceRecord.js';
+import { FinanceRecord } from '../models/FinanceRecord.ts';
 import { roundMoney, sumMoney, formatMoney } from '../utils/money.js';
 
 const records = new Map();
@@ -17,8 +17,6 @@ export function saveRecord(chatId, data) {
 
     // Сортируем по дате (новые сверху)
     userRecords.sort((a, b) => b.date - a.date);
-
-    console.log(`✅ Запись сохранена для пользователя ${chatId}:`, record.debug());
 
     return record;
 }
