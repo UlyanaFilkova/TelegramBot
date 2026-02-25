@@ -2,13 +2,13 @@ import { roundMoney, formatMoney } from '../utils/money.js';
 
 export class FinanceRecord {
     constructor(chatId, data) {
-        this.id = this.generateId();                    // Уникальный ID записи
-        this.chatId = chatId;                           // Кто создал
-        this.type = data.type === 'Доходы' ? 'income' : 'expense';  // Тип операции
-        this.amount = roundMoney(parseFloat(data.amount));                   // Сумма
-        this.description = data.description;            // Описание
-        this.category = data.category;                  // Категория
-        this.createdAt = new Date();                     // Дата создания в системе
+        this.id = this.generateId();
+        this.chatId = chatId;
+        this.type = data.type;
+        this.amount = roundMoney(parseFloat(data.amount));
+        this.description = data.description;
+        this.category = data.category;
+        this.createdAt = new Date();
 
         this.setDateTime(data.date, data.time);
     }
