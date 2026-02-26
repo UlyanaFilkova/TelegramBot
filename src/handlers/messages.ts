@@ -1,9 +1,9 @@
 import TelegramBot from 'node-telegram-bot-api';
 import { chatHistory, userModel, askOpenRouter } from '../services/openrouter.ts';
-import { markdownToTelegram, splitLongMessage } from '../utils/formatters.js';
-import { withRetry } from '../utils/retry.js';
+import { markdownToTelegram, splitLongMessage } from '../utils/formatters.ts';
+import { withRetry } from '../utils/retry.ts';
 import { FREE_MODELS, SYSTEM_PROMPT, RETRY_CONFIG, DEFAULT_MODEL, ModelKey } from '../config/constants.ts';
-import { isAIBreakingMessage, getAIBreakingMessage, isExpenseQuery } from '../utils/validation.js';
+import { isAIBreakingMessage, getAIBreakingMessage, isExpenseQuery } from '../utils/validation.ts';
 import { saveRecord, getLastRecord, formatUserStats } from '../services/storage.ts';
 import { AIResponseJSON } from '../types/index.ts';
 import { FinanceRecord } from '../models/FinanceRecord.ts';
