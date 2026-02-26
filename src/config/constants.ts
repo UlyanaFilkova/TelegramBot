@@ -1,44 +1,68 @@
-export const FREE_MODELS = {
-    'default-chat': 'qwen/qwen3-vl-30b-a3b-thinking',
+export type ModelKey =
+| 'default-chat'
+| 'solar-pro-3'
+| 'arcee-ai-large'
+| 'arcee-ai-mini'
+| 'stepfun'
+| 'z-ai'
+| 'nvidia-nano'
+| 'nvidia-3-nano'
+| 'qwen-30b'
+| 'qwen-235b'
+| 'qwen-235b-2507'
+| 'free-router'
+| 'deepseek-r1';
 
-    // быстрые
+export type ModelMap = Record<ModelKey, string>;
 
-    // upstage
-    'solar-pro-3': 'upstage/solar-pro-3:free',
+export const FREE_MODELS: ModelMap = {
+  'default-chat': 'qwen/qwen3-vl-30b-a3b-thinking',
 
-    // arcee-ai
-    'arcee-ai-large': 'arcee-ai/trinity-large-preview:free',
-    'arcee-ai-mini': 'arcee-ai/trinity-mini:free',
+  // быстрые
 
-    // stepfun
-    'stepfun': 'stepfun/step-3.5-flash:free',
+  // upstage
+  'solar-pro-3': 'upstage/solar-pro-3:free',
 
-    // z-ai
-    'z-ai': 'z-ai/glm-4.5-air:free',
+  // arcee-ai
+  'arcee-ai-large': 'arcee-ai/trinity-large-preview:free',
+  'arcee-ai-mini': 'arcee-ai/trinity-mini:free',
 
-    // nvidia
-    'nvidia-nano': 'nvidia/nemotron-nano-12b-v2-vl:free',
-    'nvidia-3-nano': 'nvidia/nemotron-3-nano-30b-a3b:free',
+  // stepfun
+  'stepfun': 'stepfun/step-3.5-flash:free',
 
-    // qwen
-    'qwen-30b': 'qwen/qwen3-vl-30b-a3b-thinking',
-    'qwen-235b': 'qwen/qwen3-vl-235b-a22b-thinking',
-    'qwen-235b-2507': 'qwen/qwen3-235b-a22b-thinking-2507',
+  // z-ai
+  'z-ai': 'z-ai/glm-4.5-air:free',
 
-    // OpenRouter (автоматически выбирает лучшую бесплатную модель)
-    'free-router': 'openrouter/free',
+  // nvidia
+  'nvidia-nano': 'nvidia/nemotron-nano-12b-v2-vl:free',
+  'nvidia-3-nano': 'nvidia/nemotron-3-nano-30b-a3b:free',
 
-    // медленные
+  // qwen
+  'qwen-30b': 'qwen/qwen3-vl-30b-a3b-thinking',
+  'qwen-235b': 'qwen/qwen3-vl-235b-a22b-thinking',
+  'qwen-235b-2507': 'qwen/qwen3-235b-a22b-thinking-2507',
 
-    // DeepSeek
-    'deepseek-r1': 'deepseek/deepseek-r1-0528:free',
+  // OpenRouter (автоматически выбирает лучшую бесплатную модель)
+  'free-router': 'openrouter/free',
+
+  // медленные
+
+  // DeepSeek
+  'deepseek-r1': 'deepseek/deepseek-r1-0528:free',
 };
 
-export const DEFAULT_MODEL = "default-chat"
+export const DEFAULT_MODEL: ModelKey = 'default-chat';
 
-export const SYSTEM_PROMPT = {
-    role: 'system',
-    content: `Ты финансовый помощник в Telegram. Говори на русском языке. Отвечай как Лебовски из фильма Большой Лебовски. Отвечай кратко и по делу.
+export type PromptRole = 'system' | 'user' | 'assistant';
+
+export interface PromptMessage {
+  role: PromptRole;
+  content: string;
+}
+
+export const SYSTEM_PROMPT: PromptMessage = {
+  role: 'system',
+  content: `Ты финансовый помощник в Telegram. Говори на русском языке. Отвечай как Лебовски из фильма Большой Лебовски. Отвечай кратко и по делу.
 
 Твоя задача: анализировать сообщения пользователя и определять, являются ли они финансовыми операциями (доходы/расходы).
 
@@ -111,13 +135,19 @@ export const SYSTEM_PROMPT = {
 Важно: 
 - Если пользователь написал просто число (например "500"), считай это расходом без описания, категория "❓ Другое".
 - Дата всегда в формате ДД-ММ-ГГГГ (день-месяц-год)
-- Время в формате ЧЧ:ММ`
+- Время в формате ЧЧ:ММ`,
 };
 
-export const ADMIN_ID = 1120721483;
+export const ADMIN_ID: number = process.env.ADMIN_ID;
 
-export const RETRY_CONFIG = {
-    maxRetries: 3,
-    baseDelay: 2000,
-    maxDelay: 10000
+export interface RetryConfig {
+  maxRetries: number;
+  baseDelay: number;
+  maxDelay: number;
+}
+
+export const RETRY_CONFIG: RetryConfig = {
+  maxRetries: 3,
+  baseDelay: 2000,
+  maxDelay: 10000,
 };
