@@ -1,5 +1,15 @@
-export async function withRetry(fn, chatId, bot, config) {
-  const { maxRetries, baseDelay } = config;
+import TelegramBot from 'node-telegram-bot-api';
+import { RetryConfig } from '../config/constants.ts';
+
+type AsyncFunction<T = string> = () => Promise<T>;
+
+export async function withRetry<T = string>(
+  fn: AsyncFunction<T>,
+  chatId: number,
+  bot: TelegramBot | null,
+  config: RetryConfig
+): Promise<T> {
+  const { maxRetries, baseDelay, maxDelay } = config;
   let lastError = null;
 
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
@@ -17,7 +27,7 @@ export async function withRetry(fn, chatId, bot, config) {
         }
 
         // Иначе продолжаем цикл (повторяем попытку)
-        const delay = Math.min(baseDelay * Math.pow(2, attempt - 1), config.maxDelay);
+        const delay = Math.min(baseDelay * Math.pow(2, attempt - 1), maxDelay);
         console.log(`⏳ Пустой ответ, ждем ${delay}мс перед попыткой ${attempt + 1}...`);
 
         if (attempt === 1 && bot) {
@@ -47,7 +57,8 @@ export async function withRetry(fn, chatId, bot, config) {
         error.code === 'ETIMEDOUT' || // Timeout
         error.message?.includes('timeout') ||
         error.message?.includes('rate limit') ||
-        error.message?.includes('overloaded');
+        error.message?.includes('overloaded') ||
+        error.message?.includes('Empty response');
 
       if (!shouldRetry || attempt === maxRetries) {
         console.log(`❌ Попытка ${attempt} не удалась, повтор не требуется или достигнут лимит`);
@@ -55,7 +66,7 @@ export async function withRetry(fn, chatId, bot, config) {
       }
 
       // Экспоненциальная задержка
-      const delay = Math.min(baseDelay * Math.pow(2, attempt - 1), config.maxDelay);
+      const delay = Math.min(baseDelay * Math.pow(2, attempt - 1), maxDelay);
       console.log(`⏳ Ждем ${delay}мс перед попыткой ${attempt + 1}...`);
 
       if (attempt === 1 && bot && !error.message?.includes('Empty response')) {

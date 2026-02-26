@@ -1,6 +1,6 @@
 import TelegramBot from 'node-telegram-bot-api';
-import { chatHistory, userModel } from '../services/openrouter.js';
-import { formatModelsList } from '../utils/formatters.js';
+import { chatHistory, userModel } from '../services/openrouter.ts';
+import { formatModelsList } from '../utils/formatters.ts';
 import { FREE_MODELS, ADMIN_ID, DEFAULT_MODEL, ModelKey } from '../config/constants.ts';
 
 type TelegramMessage = TelegramBot.Message;

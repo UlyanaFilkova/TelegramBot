@@ -1,4 +1,4 @@
-export function isAIBreakingMessage(text) {
+export function isAIBreakingMessage(text: string | null | undefined): boolean {
   if (!text) return true;
 
   const trimmed = text.trim();
@@ -26,7 +26,9 @@ export function isAIBreakingMessage(text) {
   return false;
 }
 
-export function getAIBreakingMessage(text) {
+export function getAIBreakingMessage(text: string | null | undefined): string {
+  if (!text) return '🤔 Пустое сообщение. Напиши что-нибудь.';
+
   const trimmed = text.trim();
 
   // Только цифры
@@ -53,7 +55,7 @@ export function getAIBreakingMessage(text) {
   return '🤨 Я не могу обработать такое сообщение. Попробуй написать обычным текстом.';
 }
 
-export function isExpenseQuery(text) {
+export function isExpenseQuery(text: string | null | undefined): boolean {
   if (!text) return false;
 
   const expenseKeywords = [

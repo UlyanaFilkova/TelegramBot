@@ -1,8 +1,8 @@
 import TelegramBot from 'node-telegram-bot-api';
 import dotenv from 'dotenv';
-import { createOpenRouterClient, diagnoseOpenRouterKey } from './services/openrouter.js';
-import { registerCommands } from './handlers/commands.js';
-import { registerMessageHandler } from './handlers/messages.js';
+import { createOpenRouterClient, diagnoseOpenRouterKey } from './services/openrouter.ts';
+import { registerCommands } from './handlers/commands.ts';
+import { registerMessageHandler } from './handlers/messages.ts';
 
 dotenv.config();
 

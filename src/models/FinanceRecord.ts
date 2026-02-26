@@ -1,5 +1,5 @@
-import { roundMoney } from '../utils/money.js';
-import { TransactionType, AIResponseJSON } from '../types/index.js';
+import { roundMoney } from '../utils/money.ts';
+import { TransactionType, AIResponseJSON } from '../types/index.ts';
 
 export class FinanceRecord {
   public readonly id: string;
