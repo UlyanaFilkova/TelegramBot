@@ -27,9 +27,9 @@ export async function askOpenRouter(
 
     history.push({ role: 'user', content: userMessage });
 
-    // Ограничиваем историю последними 10 сообщениями
-    if (history.length > 10) {
-      history = history.slice(-10);
+    // Ограничиваем историю последними 20 сообщениями
+    if (history.length > 20) {
+      history = history.slice(-20);
     }
 
     const model = userModel.get(chatId) || modelKey;
