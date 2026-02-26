@@ -13,7 +13,9 @@ export type ModelKey =
 | 'free-router'
 | 'deepseek-r1';
 
-export const FREE_MODELS: Record<ModelKey, string> = {
+export type ModelMap = Record<ModelKey, string>;
+
+export const FREE_MODELS: ModelMap = {
   'default-chat': 'qwen/qwen3-vl-30b-a3b-thinking',
 
   // быстрые

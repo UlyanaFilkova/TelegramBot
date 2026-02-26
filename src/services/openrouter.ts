@@ -1,11 +1,13 @@
 import OpenAI from 'openai';
-import { DEFAULT_MODEL } from '../config/constants.ts';
+import { DEFAULT_MODEL, ModelKey, PromptMessage, ModelMap } from '../config/constants.ts';
 
-export const chatHistory = new Map();
+export type ChatHistory = Map<number, PromptMessage[]>;
+export const chatHistory: ChatHistory = new Map();
 
-export const userModel = new Map();
+export type UserModel = Map<number, ModelKey>;
+export const userModel: UserModel = new Map();
 
-export function createOpenRouterClient(apiKey) {
+export function createOpenRouterClient(apiKey: string): OpenAI {
   return new OpenAI({
     apiKey: apiKey,
     baseURL: 'https://openrouter.ai/api/v1',
@@ -13,13 +15,13 @@ export function createOpenRouterClient(apiKey) {
 }
 
 export async function askOpenRouter(
-  openrouter,
-  chatId,
-  userMessage,
-  FREE_MODELS,
-  SYSTEM_PROMPT,
-  modelKey = 'deepseek-v3'
-) {
+  openrouter: OpenAI,
+  chatId: number,
+  userMessage: string,
+  FREE_MODELS: ModelMap,
+  SYSTEM_PROMPT: PromptMessage,
+  modelKey: ModelKey
+): Promise<string> {
   try {
     let history = chatHistory.get(chatId) || [];
 
@@ -39,12 +41,16 @@ export async function askOpenRouter(
 
     const response = await openrouter.chat.completions.create({
       model: modelId,
-      messages: messages,
+      messages: messages as OpenAI.Chat.ChatCompletionMessageParam[],
       max_tokens: 500,
       temperature: 0.7,
     });
 
     const reply = response.choices[0].message.content;
+
+    if (!reply) {
+      throw new Error('Пустой ответ от OpenRouter');
+    }
 
     history.push({ role: 'assistant', content: reply });
     chatHistory.set(chatId, history);
@@ -56,7 +62,7 @@ export async function askOpenRouter(
   }
 }
 
-export async function diagnoseOpenRouterKey(openrouterKey) {
+export async function diagnoseOpenRouterKey(openrouterKey: string): Promise<void>  {
   console.log('🔍 Диагностика ключа OpenRouter...');
 
   // Проверка 1: Формат ключа
