@@ -1,4 +1,6 @@
-export function formatModelsList(FREE_MODELS) {
+import { ModelMap } from '../config/constants.ts';
+
+export function formatModelsList(FREE_MODELS: ModelMap): string {
   let text = '🎯 *Доступные бесплатные модели:*\n\n';
   let i = 1;
   for (const [key, name] of Object.entries(FREE_MODELS)) {
@@ -10,8 +12,8 @@ export function formatModelsList(FREE_MODELS) {
   return text;
 }
 
-export function markdownToTelegram(text) {
-  if (!text) return text;
+export function markdownToTelegram(text: string | null | undefined): string {
+  if (!text) return '';
 
   let converted = text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
@@ -43,7 +45,30 @@ export function markdownToTelegram(text) {
   return converted;
 }
 
-export function splitLongMessage(text, maxLength = 4096) {
+export function splitLongMessage(text: string, maxLength: number = 4096): string[] {
+  if (!text) return [];
   if (text.length <= maxLength) return [text];
-  return text.match(/[\s\S]{1,4096}/g) || [];
+
+  // Разбиваем по границам слов, если возможно
+  const chunks: string[] = [];
+  let remaining = text;
+
+  while (remaining.length > 0) {
+    if (remaining.length <= maxLength) {
+      chunks.push(remaining);
+      break;
+    }
+
+    // Ищем последний пробел перед maxLength
+    let cutIndex = remaining.lastIndexOf(' ', maxLength);
+    if (cutIndex === -1) {
+      // Если нет пробела, режем по maxLength
+      cutIndex = maxLength;
+    }
+
+    chunks.push(remaining.substring(0, cutIndex));
+    remaining = remaining.substring(cutIndex).trim();
+  }
+
+  return chunks;
 }
