@@ -1,4 +1,4 @@
-import { ModelMap } from '../config/constants.ts';
+import { ModelMap } from '../config/constants.js';
 
 export function formatModelsList(FREE_MODELS: ModelMap): string {
   let text = '🎯 *Доступные бесплатные модели:*\n\n';

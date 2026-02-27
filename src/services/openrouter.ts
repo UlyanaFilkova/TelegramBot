@@ -1,5 +1,5 @@
 import OpenAI from 'openai';
-import { DEFAULT_MODEL, ModelKey, PromptMessage, ModelMap } from '../config/constants.ts';
+import { DEFAULT_MODEL, ModelKey, PromptMessage, ModelMap } from '../config/constants.js';
 
 export type ChatHistory = Map<number, PromptMessage[]>;
 export const chatHistory: ChatHistory = new Map();
@@ -57,8 +57,9 @@ export async function askOpenRouter(
 
     return reply;
   } catch (error) {
-    console.error('❌ Ошибка OpenRouter:', error);
-    throw error;
+    const err = error as Error;
+    console.error('❌ Ошибка OpenRouter:', err);
+    throw err;
   }
 }
 
@@ -89,7 +90,8 @@ export async function diagnoseOpenRouterKey(openrouterKey: string): Promise<void
       console.log('Ошибка:', error);
     }
   } catch (error) {
-    console.log('❌ Ошибка при проверке ключа:', error.message);
+    const err = error as Error;
+    console.log('❌ Ошибка при проверке ключа:', err.message);
   }
 
   // Проверка 3: Тестовый запрос к модели
@@ -115,6 +117,7 @@ export async function diagnoseOpenRouterKey(openrouterKey: string): Promise<void
       console.log('Ошибка:', error);
     }
   } catch (error) {
-    console.log('❌ Ошибка при тестовом запросе:', error.message);
+    const err = error as Error;
+    console.log('❌ Ошибка при тестовом запросе:', err.message);
   }
 }

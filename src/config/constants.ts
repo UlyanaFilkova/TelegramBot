@@ -138,7 +138,7 @@ export const SYSTEM_PROMPT: PromptMessage = {
 - Время в формате ЧЧ:ММ`,
 };
 
-export const ADMIN_ID: number = process.env.ADMIN_ID;
+export const ADMIN_ID: number = Number(process.env.ADMIN_ID) || 0;
 
 export interface RetryConfig {
   maxRetries: number;

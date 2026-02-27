@@ -1,5 +1,6 @@
 import TelegramBot from 'node-telegram-bot-api';
-import { RetryConfig } from '../config/constants.ts';
+import { RetryConfig } from '../config/constants.js';
+import { ErrorWithDetails } from '../types/index.js';
 
 type AsyncFunction<T = string> = () => Promise<T>;
 
@@ -18,7 +19,7 @@ export async function withRetry<T = string>(
 
       const result = await fn();
 
-      if (!result || result.trim().length === 0) {
+      if (typeof result === 'string' && (!result || result.trim().length === 0)) {
         console.log(`⚠️ Попытка ${attempt} вернула пустой ответ`);
 
         // Если это последняя попытка, выбрасываем специальную ошибку
@@ -45,20 +46,21 @@ export async function withRetry<T = string>(
 
       return result;
     } catch (error) {
-      lastError = error;
+      const err = error as ErrorWithDetails;
+      lastError = err;
 
       const shouldRetry =
-        error.status === 429 || // Too Many Requests
-        error.status === 500 || // Internal Server Error
-        error.status === 502 || // Bad Gateway
-        error.status === 503 || // Service Unavailable
-        error.status === 504 || // Gateway Timeout
-        error.code === 'ECONNRESET' || // Connection reset
-        error.code === 'ETIMEDOUT' || // Timeout
-        error.message?.includes('timeout') ||
-        error.message?.includes('rate limit') ||
-        error.message?.includes('overloaded') ||
-        error.message?.includes('Empty response');
+        err.status === 429 || // Too Many Requests
+        err.status === 500 || // Internal Server Error
+        err.status === 502 || // Bad Gateway
+        err.status === 503 || // Service Unavailable
+        err.status === 504 || // Gateway Timeout
+        err.code === 'ECONNRESET' || // Connection reset
+        err.code === 'ETIMEDOUT' || // Timeout
+        err.message?.includes('timeout') ||
+        err.message?.includes('rate limit') ||
+        err.message?.includes('overloaded') ||
+        err.message?.includes('Empty response');
 
       if (!shouldRetry || attempt === maxRetries) {
         console.log(`❌ Попытка ${attempt} не удалась, повтор не требуется или достигнут лимит`);
@@ -69,7 +71,7 @@ export async function withRetry<T = string>(
       const delay = Math.min(baseDelay * Math.pow(2, attempt - 1), maxDelay);
       console.log(`⏳ Ждем ${delay}мс перед попыткой ${attempt + 1}...`);
 
-      if (attempt === 1 && bot && !error.message?.includes('Empty response')) {
+      if (attempt === 1 && bot && !err.message?.includes('Empty response')) {
         try {
           await bot.sendMessage(
             chatId,

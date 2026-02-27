@@ -1,5 +1,5 @@
-import { roundMoney } from '../utils/money.ts';
-import { TransactionType, AIResponseJSON } from '../types/index.ts';
+import { roundMoney } from '../utils/money.js';
+import { TransactionType, AIResponseJSON } from '../types/index.js';
 
 export class FinanceRecord {
   public readonly id: string;
@@ -19,6 +19,7 @@ export class FinanceRecord {
     this.description = data.description;
     this.category = data.category;
     this.createdAt = new Date();
+    this.date = new Date();
 
     this.setDateTime(data.date, data.time);
   }
