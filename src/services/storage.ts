@@ -50,32 +50,40 @@ export function getLastRecord(chatId: number): FinanceRecord | null {
 export function getUserStats(chatId: number): UserStats {
   const userRecords = getUserRecords(chatId);
 
+  // ✅ Правильная инициализация структуры
   const stats: UserStats = {
     total: userRecords.length,
     income: 0,
     expense: 0,
     balance: 0,
-    byCategory: {},
-  } as UserStats;
+    byCategory: {
+      income: {},
+      expense: {}
+    }
+  };
 
   userRecords.forEach((record) => {
     if (record.type === 'income') {
       stats.income = roundMoney(stats.income + record.amount);
 
-      const incomeCat = stats.byCategory.income;
-      if (!incomeCat[record.category]) {
-        incomeCat[record.category] = 0;
+      // ✅ Безопасно работаем с income категориями
+      if (!stats.byCategory.income[record.category]) {
+        stats.byCategory.income[record.category] = 0;
       }
-      incomeCat[record.category] = roundMoney(incomeCat[record.category] + record.amount);
+      stats.byCategory.income[record.category] = roundMoney(
+        stats.byCategory.income[record.category] + record.amount
+      );
 
     } else {
       stats.expense = roundMoney(stats.expense + record.amount);
 
-      const expenseCat = stats.byCategory.expense;
-      if (!expenseCat[record.category]) {
-        expenseCat[record.category] = 0;
+      // ✅ Безопасно работаем с expense категориями
+      if (!stats.byCategory.expense[record.category]) {
+        stats.byCategory.expense[record.category] = 0;
       }
-      expenseCat[record.category] = roundMoney(expenseCat[record.category] + record.amount);
+      stats.byCategory.expense[record.category] = roundMoney(
+        stats.byCategory.expense[record.category] + record.amount
+      );
     }
   });
 
@@ -98,9 +106,9 @@ export function formatUserStats(chatId: number): string {
   result += `💰 Доходы: ${formatMoney(stats.income, true)}\n`;
   result += `💸 Расходы: ${formatMoney(-stats.expense, true)}\n`;
 
-  result += `✅ Баланс: ${stats.balance >= 0 ? '+' : '-'}${Math.abs(stats.balance)}\n\n`;
+  result += `✅ Баланс: ${stats.balance >= 0 ? '+' : '-'}${Math.abs(stats.balance).toFixed(2)} ₽\n\n`;
 
-  // ✅ Собираем все категории для отображения
+  // Собираем все категории для отображения
   const allCategories: CategoryStats = {};
 
   // Добавляем доходы
@@ -116,7 +124,6 @@ export function formatUserStats(chatId: number): string {
   if (Object.keys(allCategories).length > 0) {
     result += '📈 *По категориям:*\n';
 
-    // ✅ Преобразуем в массив для сортировки
     const categoryEntries = Object.entries(allCategories) as [string, number][];
 
     categoryEntries
@@ -133,7 +140,6 @@ export function formatUserStats(chatId: number): string {
       result += `  ${record.formatShort()}\n`;
     });
   }
-
 
   return result;
 }
