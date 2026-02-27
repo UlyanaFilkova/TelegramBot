@@ -1,5 +1,5 @@
 import TelegramBot from 'node-telegram-bot-api';
-import { RetryConfig } from '../config/constants.ts';
+import { RetryConfig } from '../config/constants.js';
 
 type AsyncFunction<T = string> = () => Promise<T>;
 

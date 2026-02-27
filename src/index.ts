@@ -1,8 +1,8 @@
 import TelegramBot from 'node-telegram-bot-api';
 import dotenv from 'dotenv';
-import { createOpenRouterClient, diagnoseOpenRouterKey } from './services/openrouter.ts';
-import { registerCommands } from './handlers/commands.ts';
-import { registerMessageHandler } from './handlers/messages.ts';
+import { createOpenRouterClient } from './services/openrouter.js';
+import { registerCommands } from './handlers/commands.js';
+import { registerMessageHandler } from './handlers/messages.js';
 
 dotenv.config();
 
@@ -21,8 +21,6 @@ if (!openrouterKey) {
 
 const bot = new TelegramBot(token, { polling: true });
 const openrouter = createOpenRouterClient(openrouterKey);
-
-// await diagnoseOpenRouterKey(openrouterKey);
 
 registerCommands(bot);
 registerMessageHandler(bot, openrouter);
@@ -43,4 +41,4 @@ process.once('SIGTERM', () => {
   process.exit(0);
 });
 
-console.log('🤖 Бот успешно запущен!');
+console.log('🤖 Бот запущен в режиме polling (разработка)');

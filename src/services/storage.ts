@@ -1,6 +1,6 @@
-import { FinanceRecord } from '../models/FinanceRecord.ts';
-import { roundMoney, formatMoney } from '../utils/money.ts';
-import { AIResponseJSON, TransactionType, CategoryStats, UserStats } from '../types/index.ts';
+import { FinanceRecord } from '../models/FinanceRecord.js';
+import { roundMoney, formatMoney } from '../utils/money.js';
+import { AIResponseJSON, UserStats } from '../types/index.js';
 
 type RecordsMap = Map<number, FinanceRecord[]>;
 

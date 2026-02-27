@@ -1,5 +1,5 @@
 import OpenAI from 'openai';
-import { DEFAULT_MODEL, ModelKey, PromptMessage, ModelMap } from '../config/constants.ts';
+import { DEFAULT_MODEL, ModelKey, PromptMessage, ModelMap } from '../config/constants.js';
 
 export type ChatHistory = Map<number, PromptMessage[]>;
 export const chatHistory: ChatHistory = new Map();
@@ -57,8 +57,9 @@ export async function askOpenRouter(
 
     return reply;
   } catch (error) {
-    console.error('❌ Ошибка OpenRouter:', error);
-    throw error;
+    const err = error as Error;
+    console.error('❌ Ошибка OpenRouter:', err);
+    throw err;
   }
 }
 
