@@ -18,7 +18,7 @@ if (!token || !openrouterKey) {
 const openrouter = createOpenRouterClient(openrouterKey);
 const bot = new TelegramBot(token);
 
-// Регистрируем обработчики (они будут вызываться при получении обновлений)
+// Регистрируем обработчики
 registerCommands(bot);
 registerMessageHandler(bot, openrouter);
 
@@ -26,7 +26,17 @@ registerMessageHandler(bot, openrouter);
 const app = express();
 app.use(express.json());
 
-// Секретный путь для вебхука (для безопасности)
+// === ВАЖНО: Health check endpoint для Render ===
+app.get('/health', (req, res) => {
+  res.status(200).send('OK');
+});
+
+// Корневой endpoint для проверки
+app.get('/', (req, res) => {
+  res.send('🤖 Bot is running!');
+});
+
+// Секретный путь для вебхука
 const webhookPath = `/webhook/${token}`;
 
 // Обработчик вебхука
@@ -37,11 +47,64 @@ app.post(webhookPath, (req, res) => {
 
 // Запускаем сервер
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, async () => {
-  console.log(`🚀 Server running on port ${PORT}`);
+const server = app.listen(PORT, async () => {
+  console.log(`🚀 Сервер запущен на порту ${PORT}`);
+  console.log(`🌍 Health check: http://localhost:${PORT}/health`);
 
-  // Устанавливаем вебхук
-  const webhookUrl = `https://${process.env.RENDER_EXTERNAL_URL}${webhookPath}`;
-  await bot.setWebHook(webhookUrl);
-  console.log(`✅ Webhook set to: ${webhookUrl}`);
+  // Даем серверу немного времени на полный запуск
+  setTimeout(async () => {
+    try {
+      // Проверяем наличие URL
+      const renderUrl = process.env.RENDER_EXTERNAL_URL;
+
+      if (!renderUrl) {
+        console.error('❌ RENDER_EXTERNAL_URL не задан!');
+        console.log('📝 Добавь в переменные окружения Render:');
+        console.log('   RENDER_EXTERNAL_URL = https://твой-сервис.onrender.com');
+        return;
+      }
+
+      const webhookUrl = `${renderUrl}${webhookPath}`;
+      console.log(`🔗 Устанавливаю вебхук: ${webhookUrl}`);
+
+      const result = await bot.setWebHook(webhookUrl);
+
+      if (result) {
+        console.log(`✅ Вебхук успешно установлен: ${webhookUrl}`);
+
+        // Проверяем статус вебхука
+        const webhookInfo = await bot.getWebHookInfo();
+        console.log('📊 Статус вебхука:', {
+          url: webhookInfo.url,
+          pending_updates: webhookInfo.pending_update_count,
+        });
+      } else {
+        console.error('❌ Не удалось установить вебхук');
+      }
+    } catch (error) {
+      console.error('❌ Ошибка при установке вебхука:', error.message);
+
+      // Запасной вариант - polling
+      console.log('⚠️ Запускаю polling как запасной вариант...');
+      bot.startPolling();
+      console.log('✅ Бот работает в режиме polling');
+    }
+  }, 3000);
+});
+
+// Graceful shutdown
+process.on('SIGTERM', () => {
+  console.log('👋 SIGTERM получен, закрываю сервер...');
+  server.close(() => {
+    console.log('Сервер закрыт');
+    process.exit(0);
+  });
+});
+
+process.on('SIGINT', () => {
+  console.log('👋 SIGINT получен, закрываю сервер...');
+  server.close(() => {
+    console.log('Сервер закрыт');
+    process.exit(0);
+  });
 });
