@@ -47,3 +47,8 @@ export interface UserStats {
 export interface StorageData {
   [chatId: number]: FinanceRecordData[];
 }
+
+export interface ErrorWithDetails extends Error {
+  status?: number;
+  code?: string;
+}

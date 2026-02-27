@@ -90,7 +90,8 @@ export async function diagnoseOpenRouterKey(openrouterKey: string): Promise<void
       console.log('Ошибка:', error);
     }
   } catch (error) {
-    console.log('❌ Ошибка при проверке ключа:', error.message);
+    const err = error as Error;
+    console.log('❌ Ошибка при проверке ключа:', err.message);
   }
 
   // Проверка 3: Тестовый запрос к модели
@@ -116,6 +117,7 @@ export async function diagnoseOpenRouterKey(openrouterKey: string): Promise<void
       console.log('Ошибка:', error);
     }
   } catch (error) {
-    console.log('❌ Ошибка при тестовом запросе:', error.message);
+    const err = error as Error;
+    console.log('❌ Ошибка при тестовом запросе:', err.message);
   }
 }

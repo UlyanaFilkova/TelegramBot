@@ -1,6 +1,6 @@
 import { FinanceRecord } from '../models/FinanceRecord.js';
 import { roundMoney, formatMoney } from '../utils/money.js';
-import { AIResponseJSON, UserStats } from '../types/index.js';
+import { AIResponseJSON, UserStats, CategoryStats } from '../types/index.js';
 
 type RecordsMap = Map<number, FinanceRecord[]>;
 
@@ -21,7 +21,7 @@ export function saveRecord(chatId: number, data: AIResponseJSON): FinanceRecord 
   userRecords.push(record);
 
   // Сортируем по дате (новые сверху)
-  userRecords.sort((a, b) => b.date - a.date);
+  userRecords.sort((a, b) => b.date.getTime() - a.date.getTime());
 
   return record;
 }
@@ -59,20 +59,24 @@ export function getUserStats(chatId: number): UserStats {
   } as UserStats;
 
   userRecords.forEach((record) => {
-    // Суммируем с округлением
     if (record.type === 'income') {
       stats.income = roundMoney(stats.income + record.amount);
+
+      const incomeCat = stats.byCategory.income;
+      if (!incomeCat[record.category]) {
+        incomeCat[record.category] = 0;
+      }
+      incomeCat[record.category] = roundMoney(incomeCat[record.category] + record.amount);
+
     } else {
       stats.expense = roundMoney(stats.expense + record.amount);
-    }
 
-    // Статистика по категориям
-    if (!stats.byCategory[record.category]) {
-      stats.byCategory[record.category] = 0;
+      const expenseCat = stats.byCategory.expense;
+      if (!expenseCat[record.category]) {
+        expenseCat[record.category] = 0;
+      }
+      expenseCat[record.category] = roundMoney(expenseCat[record.category] + record.amount);
     }
-    stats.byCategory[record.category] = roundMoney(
-      stats.byCategory[record.category] + record.amount
-    );
   });
 
   stats.balance = roundMoney(stats.income - stats.expense);
@@ -96,9 +100,26 @@ export function formatUserStats(chatId: number): string {
 
   result += `✅ Баланс: ${stats.balance >= 0 ? '+' : '-'}${Math.abs(stats.balance)}\n\n`;
 
-  if (Object.keys(stats.byCategory).length > 0) {
+  // ✅ Собираем все категории для отображения
+  const allCategories: CategoryStats = {};
+
+  // Добавляем доходы
+  Object.entries(stats.byCategory.income).forEach(([category, amount]) => {
+    allCategories[category] = (allCategories[category] || 0) + amount;
+  });
+
+  // Добавляем расходы (с минусом)
+  Object.entries(stats.byCategory.expense).forEach(([category, amount]) => {
+    allCategories[category] = (allCategories[category] || 0) - amount;
+  });
+
+  if (Object.keys(allCategories).length > 0) {
     result += '📈 *По категориям:*\n';
-    Object.entries(stats.byCategory)
+
+    // ✅ Преобразуем в массив для сортировки
+    const categoryEntries = Object.entries(allCategories) as [string, number][];
+
+    categoryEntries
       .sort((a, b) => b[1] - a[1])
       .forEach(([category, amount]) => {
         result += `  ${category}: ${formatMoney(amount, true)}\n`;
@@ -112,6 +133,7 @@ export function formatUserStats(chatId: number): string {
       result += `  ${record.formatShort()}\n`;
     });
   }
+
 
   return result;
 }
@@ -179,16 +201,22 @@ export function getStatsForPeriod(chatId: number, days: number): UserStats {
   periodRecords.forEach((record) => {
     if (record.type === 'income') {
       stats.income = roundMoney(stats.income + record.amount);
+
+      const incomeCat = stats.byCategory.income;
+      if (!incomeCat[record.category]) {
+        incomeCat[record.category] = 0;
+      }
+      incomeCat[record.category] = roundMoney(incomeCat[record.category] + record.amount);
+
     } else {
       stats.expense = roundMoney(stats.expense + record.amount);
-    }
 
-    if (!stats.byCategory[record.category]) {
-      stats.byCategory[record.category] = 0;
+      const expenseCat = stats.byCategory.expense;
+      if (!expenseCat[record.category]) {
+        expenseCat[record.category] = 0;
+      }
+      expenseCat[record.category] = roundMoney(expenseCat[record.category] + record.amount);
     }
-    stats.byCategory[record.category] = roundMoney(
-      stats.byCategory[record.category] + record.amount
-    );
   });
 
   stats.balance = roundMoney(stats.income - stats.expense);
