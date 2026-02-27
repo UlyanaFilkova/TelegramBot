@@ -82,7 +82,8 @@ const server = app.listen(PORT, async () => {
         console.error('❌ Не удалось установить вебхук');
       }
     } catch (error) {
-      console.error('❌ Ошибка при установке вебхука:', error.message);
+      const err = error as Error;
+      console.error('❌ Ошибка при установке вебхука:', err.message);
 
       // Запасной вариант - polling
       console.log('⚠️ Запускаю polling как запасной вариант...');
