@@ -3,6 +3,7 @@ import dotenv from 'dotenv';
 import { createOpenRouterClient } from './services/openrouter.js';
 import { registerCommands } from './handlers/commands.js';
 import { registerMessageHandler } from './handlers/messages.js';
+import { testConnection, createTables } from './database.js';
 
 dotenv.config();
 
@@ -16,6 +17,14 @@ if (!token) {
 
 if (!openrouterKey) {
   console.error('❌ Ошибка: AI key не найден');
+  process.exit(1);
+}
+
+try {
+  await testConnection();
+  await createTables();
+} catch (error) {
+  console.error('❌ Не удалось запустить приложение:', error);
   process.exit(1);
 }
 

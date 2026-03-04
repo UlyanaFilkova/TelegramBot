@@ -4,6 +4,7 @@ import dotenv from 'dotenv';
 import { createOpenRouterClient } from './services/openrouter.js';
 import { registerCommands } from './handlers/commands.js';
 import { registerMessageHandler } from './handlers/messages.js';
+import { createTables, testConnection } from './database.js';
 
 dotenv.config();
 
@@ -12,6 +13,14 @@ const openrouterKey = process.env.OPENROUTER_API_KEY;
 
 if (!token || !openrouterKey) {
   console.error('❌ Missing tokens');
+  process.exit(1);
+}
+
+try {
+  await testConnection();
+  await createTables();
+} catch (error) {
+  console.error('❌ Не удалось запустить приложение:', error);
   process.exit(1);
 }
 
